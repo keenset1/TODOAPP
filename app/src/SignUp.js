@@ -1,94 +1,131 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
 
-  const SignUp = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+class Auth extends Component {
+  constructor(props) {
+    super(props);
 
-  const handleSignUp = async (event) => {
-    event.preventDefault();
-    const response = await fetch('https://my-api.com/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-  };
+    // Set initial state with empty email and password, not logged in, and no error
+    this.state = {
+      email: '',
+      password: '',
+      isLoggedIn: false,
+      error: null
+    };
 
-  return (
-    <form onSubmit={handleSignUp}>
-      <input
-        type="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        placeholder="Password"
-      />
-      <button type="submit">Sign Up</button>
-    </form>
-  );
-};
-
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    const response = await fetch('https://my-api.com/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-  };
-
-  return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        placeholder="Password"
-      />
-      <button type="submit">Login</button>
-    </form>
-  );
-};
-
-const AuthenticatedApp = () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    return <Login />;
+    // Bind event handlers to `this`
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSignUp = this.handleSignUp.bind(this);
+    this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
-  return (
-    <div>
-      <h1>Welcome! You are authenticated.</h1>
-    </div>
-  );
-};
+  // Update state when input fields are changed
+  handleInputChange(event) {
+    const { name, value } = event.target;
 
-const App = () => {
-  return (
-    <div>
-      <SignUp />
-      <Login />
-      <AuthenticatedApp />
-    </div>
-  );
-};
+    this.setState({
+      [name]: value
+    });
+  }
 
-export default App;
+  // Handle sign up form submission
+handleSignUp(event) {
+  event.preventDefault();
+
+  const { email, password } = this.state;
+
+  // Check if email and password are not empty
+  if (email.trim() === '' || password.trim() === '') {
+    this.setState({
+      error: 'Email and password are required.'
+    });
+    return;
+  }
+
+  // Check if password is at least 6 characters long
+  if (password.length < 6) {
+    this.setState({
+      error: 'Password must be at least 6 characters long.'
+    });
+    return;
+  }
+
+  // Your sign up logic here
+
+  // Update state to reflect that user is logged in
+  this.setState({
+    isLoggedIn: true
+  });
+}
+
+  // Handle login form submission
+  handleLogin(event) {
+    event.preventDefault();
+
+    // Your login logic here
+
+    // Update state to reflect that user is logged in
+    this.setState({
+      isLoggedIn: true
+    });
+  }
+
+  // Handle logout button click
+  handleLogout(event) {
+    event.preventDefault();
+
+    // Your logout logic here
+
+    // Update state to clear email and password and set user to not logged in
+    this.setState({
+      email: '',
+      password: '',
+      isLoggedIn: false
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        {/* Display error message if one exists */}
+        {this.state.error && <p>{this.state.error}</p>}
+
+        {/* Render either logged in or logged out state */}
+        {this.state.isLoggedIn ? (
+          <div>
+            <p>You are logged in.</p>
+            <button onClick={this.handleLogout}>Logout</button>
+          </div>
+        ) : (
+          <div>
+            {/* Render sign up form */}
+            <form onSubmit={this.handleSignUp}>
+              <h2>Sign Up</h2>
+              <label htmlFor="email">Email:</label>
+              <input type="email" name="email" value={this.state.email} onChange={this.handleInputChange} required />
+              <br />
+              <label htmlFor="password">Password:</label>
+              <input type="password" name="password" value={this.state.password} onChange={this.handleInputChange} required />
+              <br />
+              <button type="submit">Sign Up</button>
+            </form>
+
+            {/* Render login form */}
+            <form onSubmit={this.handleLogin}>
+              <h2>Login</h2>
+              <label htmlFor="email">Email:</label>
+              <input type="email" name="email" value={this.state.email} onChange={this.handleInputChange} required />
+              <br />
+              <label htmlFor="password">Password:</label>
+              <input type="password" name="password" value={this.state.password} onChange={this.handleInputChange} required />
+              <br />
+              <button type="submit">Login</button>
+            </form>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+export default Auth;
